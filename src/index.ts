@@ -20,12 +20,39 @@ async function main() {
     //         },
     //     },
     // });
-    const users = await prisma.user.findMany({
-        include: {
-            posts: true,
-        },
-    });
-    console.log(users);
+
+    // Use transaction
+    const [findFirstOrThrow, createdUser] = await prisma.$transaction([
+        prisma.user.findFirstOrThrow({
+            where: {
+                name: 'Mai',
+            },
+        }),
+        prisma.user.create({
+            data: {
+                email: 'dung@gmail.com',
+                name: 'Dung',
+                posts: {
+                    create: [
+                        {
+                            title: 'Post 1',
+                        },
+                        {
+                            title: 'Post 2',
+                        },
+                    ],
+                },
+            },
+        }),
+    ]);
+    console.log(findFirstOrThrow, createdUser);
+
+    // const users = await prisma.user.findMany({
+    //     include: {
+    //         posts: true,
+    //     },
+    // });
+    // console.log(users);
 }
 main()
     .catch(async (e) => {
